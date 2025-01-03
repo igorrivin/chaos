@@ -116,6 +116,6 @@ def update_figure(n_clicks, num_points, p1, p2, r1, r2, r3):
 
     return fig, diagnostic_text
 
-
+server = app.server
 if __name__ == '__main__':
     app.run_server(debug=True)
