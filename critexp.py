@@ -1,4 +1,18 @@
-from scipy.optimize import root_scalar
+
+
+def bisection(f, a, b, tol=1e-6):
+    assert f(a) * f(b) < 0, "Root is not bracketed in [a, b]"
+    while (b - a) / 2 > tol:
+        c = (a + b) / 2
+        if f(c) == 0:
+            return c
+        elif f(a) * f(c) < 0:
+            b = c
+        else:
+            a = c
+    return (a + b) / 2
+
+
 
 def solve_for_d(x: float, y: float, z: float) -> float:
     """
@@ -24,11 +38,7 @@ def solve_for_d(x: float, y: float, z: float) -> float:
         return x**d + y**d + z**d - 1
 
     # Solve using root_scalar with a reasonable bracket
-    bracket = [0.1, 10]  # Search for d in this range
-    result = root_scalar(equation, bracket=bracket, method='bisect')
 
-    # Check if the solver succeeded
-    if not result.converged:
-        raise RuntimeError("Failed to converge to a solution for d.")
+    result = bisection(equation, 0, 1)
 
-    return result.root
+    return result
