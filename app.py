@@ -51,6 +51,7 @@ from critexp import solve_for_d
 # ... (rest of the Dash app code)
 
 app = dash.Dash(__name__)
+server = app.server
 
 # app.layout = html.Div([
 #     html.H1("Point Cloud Animation"),
@@ -119,6 +120,5 @@ for t in np.linspace(np.min(times), np.max(times), 50)
 
     return fig, diagnostic_text
 
-server = app.server
 if __name__ == '__main__':
     app.run_server(debug=True)
