@@ -39,6 +39,6 @@ def solve_for_d(x: float, y: float, z: float) -> float:
 
     # Solve using root_scalar with a reasonable bracket
 
-    result = bisection(equation, 0, 1)
+    result = bisection(equation, 0, 2)
 
     return result

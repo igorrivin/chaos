@@ -1,4 +1,3 @@
-import pandas as pd
 import numpy as np
 
 # Step 1: Define the chaos game function with probabilities
@@ -18,7 +17,7 @@ def chaos_game_triangle(num_iterations, p1=1/3.0, p2=1/3.0, r1=1/2, r2=1/2, r3=1
     point_list = [p]
     
     # Perform the iterations
-    for _ in range(num_iterations):
+    for _ in range(num_iterations-1):
         # Pick a random vertex based on probabilities
         ind = np.random.choice(len(vertices), p=probabilities)
         q = vertices[ind]
@@ -27,8 +26,6 @@ def chaos_game_triangle(num_iterations, p1=1/3.0, p2=1/3.0, r1=1/2, r2=1/2, r3=1
         p = r * p + (1-r) * q
         point_list.append(p)
     
-    df = pd.DataFrame(point_list, columns=['x', 'y'])
-    print(f"our output {len(df)}")
-    print(df.head())
-    #df.index = np.arange(num_iterations)
-    return df
+    pointarray = np.array(point_list)
+    indexed_array = np.column_stack((np.arange(num_iterations), pointarray))
+    return indexed_array

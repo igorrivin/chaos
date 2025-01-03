@@ -83,6 +83,9 @@ app.layout = html.Div([
 )
 def update_figure(n_clicks, num_points, p1, p2, r1, r2, r3):
     thedata = chaos_game_triangle(num_points, p1, p2, r1, r2, r3)
+    xarray = thedata[:, 1]
+    yarray = thedata[:, 2]
+    times = thedata[:, 0]
     fractal_dimension = solve_for_d(r1, r2, r3)
     diagnostic_text = f"Fractal Dimension: {fractal_dimension:.4f}"
 
@@ -101,13 +104,13 @@ def update_figure(n_clicks, num_points, p1, p2, r1, r2, r3):
     frames = [
     go.Frame(
         data=[go.Scatter(
-            x=thedata.x.loc[:t],
-            y=thedata.y.loc[:t],
+            x=xarray[times<t],
+            y=yarray[times<t],
             mode='markers'
         )],
         name=f't={t:.1f}'
     )
-    for t in np.linspace(thedata.index.min(), thedata.index.max(), 50)
+for t in np.linspace(np.min(times), np.max(times), 50)
 ]
 
     fig.frames = frames
