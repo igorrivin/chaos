@@ -86,12 +86,12 @@ app.layout = html.Div([
     State('r3-input', 'value')
 )
 def update_figure(n_clicks, num_points, p1, p2, r1, r2, r3):
-    thedata, fd = chaos_game_triangle(num_points, p1, p2, r1, r2, r3)
+    thedata = chaos_game_triangle(num_points, p1, p2, r1, r2, r3)
     xarray = thedata[:, 1]
     yarray = thedata[:, 2]
     times = thedata[:, 0]
     fractal_dimension = solve_for_d(r1, r2, r3)
-    diagnostic_text = f"Critical exponent: {fractal_dimension:.4f}, box dimension estimate {fd:.4f}"
+    diagnostic_text = f"Critical exponent: {fractal_dimension:.4f}"
 
     fig = go.Figure(
         data=[go.Scatter(x=[], y=[], mode='markers')],

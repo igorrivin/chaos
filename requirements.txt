@@ -3,5 +3,3 @@ plotly
 numpy
 gunicorn
 dash-daq
-scipy
-
