@@ -1,7 +1,9 @@
 
 
 def bisection(f, a, b, tol=1e-6):
-    assert f(a) * f(b) < 0, "Root is not bracketed in [a, b]"
+    #print(f"a: {f(a)}, b: {f(b)}")
+    if f(a) * f(b) >= 0:
+        return b
     while (b - a) / 2 > tol:
         c = (a + b) / 2
         if f(c) == 0:

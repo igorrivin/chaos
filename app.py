@@ -91,7 +91,7 @@ def update_figure(n_clicks, num_points, p1, p2, r1, r2, r3):
     yarray = thedata[:, 2]
     times = thedata[:, 0]
     fractal_dimension = solve_for_d(r1, r2, r3)
-    diagnostic_text = f"Critical exponent: {fractal_dimension:.4f}, fbox dimension estimate {fd:.4f}"
+    diagnostic_text = f"Critical exponent: {fractal_dimension:.4f}, box dimension estimate {fd:.4f}"
 
     fig = go.Figure(
         data=[go.Scatter(x=[], y=[], mode='markers')],
