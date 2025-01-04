@@ -61,11 +61,11 @@ server = app.server
 
 app.layout = html.Div([
     html.H1("Chaos Game Triangle"),
-    dcc.Input(id='num-points-input', type='number', value=1000, placeholder="Number of points"),
+    dcc.Input(id='num-points-input', type='number', value=100000, placeholder="Number of points"),
     #daq.PrecisionInput(id='p1-input',precision=2,value=1/3,label='p1',min=0, max=1),
     #daq.PrecisionInput(id='p2-input',precision=2,value=1/3,label='p2',min=0, max=1),
-    dcc.Input(id='p1-input', type='number', value=10.33, step=0.01, placeholder="p1"),
-    dcc.Input(id='p2-input', type='number', value=10.33, step=0.01, placeholder="p2"),
+    dcc.Input(id='p1-input', type='number', value=0.33, step=0.01, placeholder="p1"),
+    dcc.Input(id='p2-input', type='number', value=0.33, step=0.01, placeholder="p2"),
     dcc.Input(id='r1-input', type='number', value=1/2, step=0.01, placeholder="r1"),
     dcc.Input(id='r2-input', type='number', value=1/2, step=0.01, placeholder="r2"),
     dcc.Input(id='r3-input', type='number', value=1/2, step=0.01, placeholder="r3"),
@@ -91,7 +91,7 @@ def update_figure(n_clicks, num_points, p1, p2, r1, r2, r3):
     yarray = thedata[:, 2]
     times = thedata[:, 0]
     fractal_dimension = solve_for_d(r1, r2, r3)
-    diagnostic_text = f"Critical exponent: {fractal_dimension:.4f}, fractal dimension: {fd:.4f}"
+    diagnostic_text = f"Critical exponent: {fractal_dimension:.4f}, fbox dimension estimate {fd:.4f}"
 
     fig = go.Figure(
         data=[go.Scatter(x=[], y=[], mode='markers')],
