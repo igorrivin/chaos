@@ -61,7 +61,7 @@ server = app.server
 
 app.layout = html.Div([
     html.H1("Chaos Game Triangle"),
-    dcc.Input(id='num-points-input', type='number', value=100000, placeholder="Number of points"),
+    dcc.Input(id='num-points-input', type='number', value=10000, placeholder="Number of points"),
     #daq.PrecisionInput(id='p1-input',precision=2,value=1/3,label='p1',min=0, max=1),
     #daq.PrecisionInput(id='p2-input',precision=2,value=1/3,label='p2',min=0, max=1),
     dcc.Input(id='p1-input', type='number', value=0.33, step=0.01, placeholder="p1"),
