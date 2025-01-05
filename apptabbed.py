@@ -8,52 +8,42 @@ from critexp import solve_for_d
 import dash_daq as daq
 import urllib
 from dash import dash_table
+import dash_latex
 from dash.exceptions import PreventUpdate
+
+
 
 app = dash.Dash(__name__)
 server = app.server
 
+
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),  # Add URL component at the top
-    html.Div([
-        html.H1("Chaos Game Triangle",style={'textAlign': 'center'}),
-        # Add the input components
-        dcc.Input(id='num-points-input', type='number', value=10000, placeholder="Number of points"),
-        dcc.Input(id='p1-input', type='number', value=0.33, step=0.01, placeholder="p1"),
-        dcc.Input(id='p2-input', type='number', value=0.33, step=0.01, placeholder="p2"),
-        dcc.Input(id='r1-input', type='number', value=1/2, step=0.01, placeholder="r1"),
-        dcc.Input(id='r2-input', type='number', value=1/2, step=0.01, placeholder="r2"),
-        dcc.Input(id='r3-input', type='number', value=1/2, step=0.01, placeholder="r3"),
-        # Add the update button
-        html.Button('Update', id='update-button', n_clicks=0),
-        html.Button('Open in New Tab', id='new-tab-button', n_clicks=0),
-        # Add a label for the current parameter set
-        html.Div(id='parameter-label'),
-        dcc.Graph(id='point-cloud-animation',style={
-                    'height': 'calc(100vh - 200px)',  # Responsive height
-                    'minHeight': '400px'              # Minimum height
-                }),
-        html.Div(id='diagnostic-output', style={'whiteSpace': 'pre-line'}),
-        dcc.Store(id='current-params'),
-        # Store for bookmarked states
-        dcc.Store(id='bookmarked-states', data=[]),
-        html.Div(id='new-tab-dummy', style={'display': 'none'})
-        ],
-        style={
-            'maxWidth': '1200px',
-            'margin': '0 auto',
-            'padding': '20px',
-            'boxSizing': 'border-box'
-        })], style = {
-        'backgroundColor': '#f0f5f9',  # Or any color scheme
-        'minHeight': '100vh'
-        })
+    html.H1("Chaos Game Triangle"),
+    # Add the input components
+    dcc.Input(id='num-points-input', type='number', value=10000, placeholder="Number of points"),
+    dcc.Input(id='p1-input', type='number', value=0.33, step=0.01, placeholder="p1"),
+    dcc.Input(id='p2-input', type='number', value=0.33, step=0.01, placeholder="p2"),
+    dcc.Input(id='r1-input', type='number', value=1/2, step=0.01, placeholder="r1"),
+    dcc.Input(id='r2-input', type='number', value=1/2, step=0.01, placeholder="r2"),
+    dcc.Input(id='r3-input', type='number', value=1/2, step=0.01, placeholder="r3"),
+    # Add the update button
+    html.Button('Update', id='update-button', n_clicks=0),
+    html.Button('Open in New Tab', id='new-tab-button', n_clicks=0),
+    # Add a label for the current parameter set
+    html.Div(id='parameter-label'),
+    dcc.Graph(id='point-cloud-animation'),
+    html.Div(id='diagnostic-output', style={'whiteSpace': 'pre-line'}),
+    dcc.Store(id='current-params'),
+    # Store for bookmarked states
+    dcc.Store(id='bookmarked-states', data=[]),
+    html.Div(id='new-tab-dummy', style={'display': 'none'})
+])
 
 @app.callback(
     Output('point-cloud-animation', 'figure'),
     Output('diagnostic-output', 'children'),
     Output('parameter-label', 'children'),
-    Output('current-params', 'data'), 
     Input('update-button', 'n_clicks'),
     Input('url', 'search'),  # Get URL query string
     State('num-points-input', 'value'),
@@ -74,16 +64,15 @@ def update_figure(n_clicks, url_search,num_points, p1, p2, r1, r2, r3):
         r1 = float(params.get('r1', [r1])[0])
         r2 = float(params.get('r2', [r2])[0])
         r3 = float(params.get('r3', [r3])[0])
-    params = {
-        'num_points': num_points,
-        'p1': p1, 'p2': p2,
-        'r1': r1, 'r2': r2, 'r3': r3
-    }
-    
-    fig, fd = generate_figure(params)
+
+    # First, add this import at the top
+
+    thedata = chaos_game_triangle(num_points, p1, p2, r1, r2, r3)
+    xarray = thedata[:, 1]
+    yarray = thedata[:, 2]
+    times = thedata[:, 0]
     fractal_dimension = solve_for_d(r1, r2, r3)
-    diagnostic_text = f"Box dimension estimate {fd:.4f}"
-    
+    diagnostic_text = f"Critical exponent: {fractal_dimension:.4f}"
 
     # Then modify the parameter label creation in your update_figure callback:
     param_label = html.Div([
@@ -114,13 +103,38 @@ def update_figure(n_clicks, url_search,num_points, p1, p2, r1, r2, r3):
     ),
     html.Div([
         dcc.Markdown(
-            f'**Critical exponent:** *d* = {fractal_dimension:.4f}',
+            f'**Fractal dimension:** *d* = {fractal_dimension:.4f}',
             mathjax=True
-            )
-        ], style={'marginTop': '10px'})
-    ])
+        )
+    ], style={'marginTop': '10px'})
+])
+    # Create figure
+    fig = go.Figure(
+        data=[go.Scatter(x=[], y=[], mode='markers')],
+        layout=go.Layout(
+            xaxis=dict(range=[-0.1, 1.1]),
+            yaxis=dict(range=[-0.1, 1.1]),
+            updatemenus=[dict(
+                type="buttons",
+                buttons=[dict(label="Play", method="animate", args=[None])]
+            )]
+        )
+    )
+    frames = [
+    go.Frame(
+        data=[go.Scatter(
+            x=xarray[times<t],
+            y=yarray[times<t],
+            mode='markers'
+        )],
+        name=f't={t:.1f}'
+    )
+    for t in np.linspace(np.min(times), np.max(times), 50)
+    ]
+
+    fig.frames = frames
         
-    return fig, diagnostic_text, param_label, params
+    return fig, diagnostic_text, param_label
 
 # Add bookmark functionality
 @app.callback(
@@ -131,20 +145,13 @@ def update_figure(n_clicks, url_search,num_points, p1, p2, r1, r2, r3):
     prevent_initial_call=True
 )
 def add_bookmark(n_clicks, current_params, existing_bookmarks):
-    if n_clicks is None or current_params is None:
+    if n_clicks is None:
         raise PreventUpdate
     
-    # Initialize existing_bookmarks if it's None
-    if existing_bookmarks is None:
-        existing_bookmarks = []
-    
-    # Add timestamp to current parameters
+    # Add current state to bookmarks with a timestamp
     from datetime import datetime
-    bookmark_params = current_params.copy()  # Make a copy to avoid modifying the original
-    bookmark_params['timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
-    # Add to bookmarks
-    existing_bookmarks.append(bookmark_params)
+    current_params['timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    existing_bookmarks.append(current_params)
     return existing_bookmarks
 
 # Add comparison view
@@ -172,68 +179,20 @@ def generate_figure(params):
     r3 = params['r3']
     
     # Generate data
-    thedata, fd = chaos_game_triangle(num_points, p1, p2, r1, r2, r3)
+    thedata = chaos_game_triangle(num_points, p1, p2, r1, r2, r3)
     xarray = thedata[:, 1]
     yarray = thedata[:, 2]
     times = thedata[:, 0]
     
-    num_frames = 50  # Move this to a variable since we'll use it multiple times
-    
     # Create figure
     fig = go.Figure(
-        data=[go.Scatter(
-            x=[], 
-            y=[], 
-            mode='markers',
-            marker=dict(
-                size=600/np.sqrt(num_points),
-                opacity=0.6
-            )
-        )],
+        data=[go.Scatter(x=[], y=[], mode='markers')],
         layout=go.Layout(
             xaxis=dict(range=[-0.1, 1.1]),
             yaxis=dict(range=[-0.1, 1.1]),
-            # Add slider to show animation progress
-            sliders=[{
-                'currentvalue': {"prefix": "Frame: "},
-                'pad': {"t": 50},
-                'steps': [
-                    {
-                        "args": [[f"frame{k}"], {
-                            "frame": {"duration": 0},
-                            "mode": "immediate",
-                            "transition": {"duration": 0}
-                        }],
-                        "label": f"{k}/{num_frames}",
-                        "method": "animate"
-                    } 
-                    for k in range(num_frames)
-                ]
-            }],
             updatemenus=[dict(
                 type="buttons",
-                buttons=[
-                    dict(label="Play",
-                         method="animate",
-                         args=[None, {
-                             "frame": {"duration": 50, "redraw": True},
-                             "fromcurrent": True,
-                         }]),
-                    dict(label="Pause",
-                         method="animate",
-                         args=[[None], {
-                             "frame": {"duration": 0, "redraw": False},
-                             "mode": "immediate",
-                             "transition": {"duration": 0}
-                         }])
-                ],
-                direction="left",
-                pad={"r": 10, "t": 10},
-                showactive=False,
-                x=0.1,
-                xanchor="right",
-                y=1.1,
-                yanchor="top"
+                buttons=[dict(label="Play", method="animate", args=[None])]
             )]
         )
     )
@@ -243,19 +202,15 @@ def generate_figure(params):
             data=[go.Scatter(
                 x=xarray[times < t],
                 y=yarray[times < t],
-                mode='markers',
-                marker=dict(
-                    size=600/np.sqrt(num_points),
-                    opacity=0.6
-                )
+                mode='markers'
             )],
-            name=f'frame{i}'  # Changed to match slider frame names
+            name=f't={t:.1f}'
         )
-        for i, t in enumerate(np.linspace(np.min(times), np.max(times), num_frames))
+        for t in np.linspace(np.min(times), np.max(times), 50)
     ]
 
     fig.frames = frames
-    return fig, fd
+    return fig
 
 def create_single_view(params):
     return html.Div([

@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.spatial import cKDTree
 #import matplotlib.pyplot as plt
 
 def box_counting(points, box_sizes):
