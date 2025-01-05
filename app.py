@@ -5,7 +5,6 @@ from dash.dependencies import Input, Output, State
 import numpy as np
 from chaos_game import chaos_game_triangle
 from critexp import solve_for_d
-import dash_daq as daq
 import urllib
 from dash import dash_table
 from dash.exceptions import PreventUpdate
